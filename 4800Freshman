@@ -14,71 +14,116 @@
 
 
 
+
+// Global Variables
+int drivePwrArr[2];
+
+
+
+
+#define setDriveR(pwr) motor[WheelRB] = \
+  motor[WheelRT] = \
+  pwr
+
+#define setDriveL(pwr) motor[WheelLB] = \
+  motor[WheelLT] = \
+  pwr
+
+#define setArm(pwr) motor[ArmRT] = \
+  motor[ArmRB] = \
+  motor[ArmLT] = \
+  motor[LB] = \
+  pwr
+
+#define setClaw(pwr) motor[ClawL] = \
+  motor[ClawR] = \
+  pwr
+
+
+int* tank(int* arr, int lPwr, int rPwr) {
+  arr[0] = lPwr;
+  arr[1] = rPwr;
+  return arr;
+}
+
+int* arcade(int* arr, int move, int rot) {
+  arr[0] = move + rot;
+  arr[1] = move - rot;
+  return arr;
+}
+
+void setDrive(int* pwrArr) {
+  setDriveL(pwrArr[0]);
+  setDriveR(pwrArr[1]);
+}
+
+void setDriveForTime(int lPwr, int rPwr, int time) {
+  setDriveL(lPwr);
+  setDriveR(rPwr);
+  wait1Msec(time);
+  setDriveL(0);
+  setDriveR(0);
+}
+
+void setArmForTime(int pwr, int time) {
+  setArm(pwr);
+  wait1Msec(time);
+  setArm(0);
+}
+
+void setClawForTime(int pwr, int time) {
+  setClaw(pwr);
+  wait1Msec(time);
+  setClaw(0);
+}
+
+
+
 void pre_auton()
 {
 
 }
 
-void go_robit(int a, int b, int c) {
-motor[WheelRB] = motor[WheelRF] = b; // Allows you to set each side for turning. This gives you more accessibility.
-motor[WheelLB] = motor[WheelLF] = c;
-wait1Msec(a);
-}
-
-void go_arm(int a, int b, int c) {
-motor[ArmRT] = motor[ArmRB] = b;
-motor[ArmLT] = motor[ArmLB] = c;
-wait1Msec(a);
-}
-
-void go_claw(int a, int b) {
-motor[ClawL] = motor[ClawR] =	b;
-wait1Msec(a);
-}
-
 task autonomous() {
-go_robit(2000, 127, 127); //Pushes pre-loaded star under the fence
-go_robit(500, 0, 0,); // Stops robit
-go_robit(500, -127, -127); // Robit goes back
-go_robit(500, 0, 0); // Stops robit
-go_arm(750, 127, 127); // Arm up
-go_arm(500, 0, 0); // Arm stops
-go_claw(750, 127); // Claw opens
-go_claw(500, 0); // Claw stopsddd
-go_robit(500, 127, -127); // Turn towards cube
-go_robit(500, 0, 0); // Stops robit
-go_robit(750, 127, 127); // Robit moves forward to cube
-go_robit(500, 0, 0); //
-go_claw(500, 127);
-go_claw(500, 0);
+  setDriveForTime(127, 127, 2000); //Push pre-loaded star under the fence
+  setDriveForTime(-127, -127, 500); // Drive backward
+  setArmForTime(127, 127, 750); // Arm up
+  setClawForTime(127, 750); // Claw opens
+  setDriveForTime(-127, 127, 500); // Turn towards cube
+  setDriveForTime(127, 127, 750); // Drive forward to cube
+  setClawForTime(127, 500); //Grab cube
 
 }
 
 task usercontrol() {
-while(1==1) {
-motor[WheelLF] = motor[WheelLB] = vexRT[Ch2] + vexRT[Ch1];
-motor[WheelRF] = motor[WheelRB] = vexRT[Ch2] - vexRT[Ch1];
+  while(true) {
+//Drive Control
+    setDrive(arcade(&drivePwrArr, vexRT[Ch2], vexRT[Ch1]));
 
-if(vexRT[Btn5U]){ //Arm
-	motor[ArmLB] = motor[ArmLT] = motor[ArmRT] = motor[ArmRB] = 127;
-}
-else if(vexRT[Btn5D]){
-	motor[ArmLB] = motor[ArmLT] = motor[ArmRT] = motor[ArmRB] = -127;
-}
-else{
-	motor[ArmLB] = motor[ArmLT] = motor[ArmRT] = motor[ArmRB] = 0;
-}
+//Arm Control
+    if(vexRT[Btn5U]){
+	  setArm(127);
+    }
+    else if(vexRT[Btn5D]){
+	  setArm(-127);
+    }
+    else {
+      setArm(0);
+    }
 
-if(vexRT[Btn6U]){ //Claw;
-	motor[ClawL] = motor[ClawR] = 127;
-}
-else if(vexRT[Btn6D]){
-	motor[ClawL] = motor[ClawR] = -127;
-}
-else
-	motor[ClawL] = motor[ClawR] = 0;
-} //While loop close }
+//Claw Control
+    if(vexRT[Btn6U]){ //Claw;
+	  setClaw(127);
+    }
+    else if(vexRT[Btn6D]){
+	  setClaw(-127);
+    }
+    else {
+	  setClaw(0);
+    }
 
-} //Task usercontol close }
+  }
+
+}
 void allMotorsOff(){ }
 void allTasksStop(){ }
