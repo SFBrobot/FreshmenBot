@@ -19,8 +19,8 @@
 
 #include "Vex_Competition_Includes.c"   //Main competition background code...do not modify!
 
-#include "stickThresh.h"
-#include "arcadeCtl.h"
+#include "RobotC Headers/stickThresh.h"
+#include "RobotC Headers/arcadeCtl.h"
 
 
 #define setDriveL(pwr) motor[blDrive] = \
